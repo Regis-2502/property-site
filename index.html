@@ -118,7 +118,7 @@
   .tabs {
     display: flex;
     gap: 8px;
-    margin: 22px 0 20px;
+    margin: 22px 0 10px;
     flex-wrap: wrap;
   }
   .tabs button {
@@ -138,6 +138,34 @@
     color: var(--ground);
   }
   .tabs button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+  /* ---------- Sort & filter controls ---------- */
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 20px;
+  }
+  .controls select {
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--muted);
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 7px 14px;
+    cursor: pointer;
+    max-width: 100%;
+  }
+  .controls select:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .controls .count {
+    font-size: 13.5px;
+    color: var(--muted);
+    margin-left: auto;
+    font-variant-numeric: tabular-nums;
+  }
 
   /* ---------- Listing cards ---------- */
   .grid {
@@ -455,11 +483,25 @@ function photoOrPlaceholder(photo, extraClass) {
 }
 
 let currentFilter = "all";
+let currentSort = "featured";
+let filterArea = "all";
+let filterBeds = "all";
+
+const priceNum = l => Number((l.priceDisplay || "").replace(/[^\d.]/g, "")) || 0;
+const bedsNum = l => parseInt(l.beds, 10) || 0;
 
 function renderList() {
   document.title = CONFIG.siteName;
   const app = document.getElementById("app");
-  const items = LISTINGS.filter(l => currentFilter === "all" || l.status === currentFilter);
+
+  let items = LISTINGS.filter(l => currentFilter === "all" || l.status === currentFilter);
+  if (filterArea !== "all") items = items.filter(l => l.location === filterArea);
+  if (filterBeds !== "all") items = items.filter(l => bedsNum(l) >= Number(filterBeds));
+  if (currentSort === "price-low") items.sort((a, b) => priceNum(a) - priceNum(b));
+  if (currentSort === "price-high") items.sort((a, b) => priceNum(b) - priceNum(a));
+  if (currentSort === "beds") items.sort((a, b) => bedsNum(b) - bedsNum(a));
+
+  const areas = [...new Set(LISTINGS.map(l => l.location).filter(Boolean))];
 
   const cards = items.map(l => {
     const cover = l.photos && l.photos[0] && l.photos[0].src
@@ -493,6 +535,26 @@ function renderList() {
     <nav class="tabs" aria-label="Filter listings">
       ${tab("all", "All")} ${tab("rent", "For Rent")} ${tab("sale", "For Sale")}
     </nav>
+    <div class="controls">
+      <select id="sortSel" aria-label="Sort listings">
+        <option value="featured">Sort: Featured</option>
+        <option value="price-low">Price: low to high</option>
+        <option value="price-high">Price: high to low</option>
+        <option value="beds">Most bedrooms</option>
+      </select>
+      <select id="areaSel" aria-label="Filter by area">
+        <option value="all">All areas</option>
+        ${areas.map(a => `<option value="${esc(a)}">${esc(a)}</option>`).join("")}
+      </select>
+      <select id="bedsSel" aria-label="Minimum bedrooms">
+        <option value="all">Any bedrooms</option>
+        <option value="1">1+ bedrooms</option>
+        <option value="2">2+ bedrooms</option>
+        <option value="3">3+ bedrooms</option>
+        <option value="4">4+ bedrooms</option>
+      </select>
+      <span class="count">${items.length} ${items.length === 1 ? "property" : "properties"}</span>
+    </div>
     <div class="grid">${cards}</div>
     ${items.length === 0 ? '<p class="empty">No listings in this category right now — check back soon.</p>' : ""}
     <section class="contact">
@@ -505,6 +567,16 @@ function renderList() {
 
   app.querySelectorAll(".tabs button").forEach(b =>
     b.addEventListener("click", () => { currentFilter = b.dataset.filter; renderList(); }));
+
+  const sortSel = document.getElementById("sortSel");
+  const areaSel = document.getElementById("areaSel");
+  const bedsSel = document.getElementById("bedsSel");
+  sortSel.value = currentSort;
+  areaSel.value = areas.includes(filterArea) ? filterArea : "all";
+  bedsSel.value = filterBeds;
+  sortSel.addEventListener("change", () => { currentSort = sortSel.value; renderList(); });
+  areaSel.addEventListener("change", () => { filterArea = areaSel.value; renderList(); });
+  bedsSel.addEventListener("change", () => { filterBeds = bedsSel.value; renderList(); });
 
   document.getElementById("sticky").innerHTML = "";
   document.body.classList.remove("has-stickybar");
