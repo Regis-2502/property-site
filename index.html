@@ -1,0 +1,641 @@
+<title>My Property Listings</title>
+<style>
+  /* ---------- Design tokens ---------- */
+  :root {
+    --ground: #FAFAF7;
+    --card: #FFFFFF;
+    --ink: #1F2A24;
+    --muted: #66756C;
+    --line: #E3E8E2;
+    --accent: #1E5B4A;
+    --accent-soft: #EAF2EE;
+    --sale: #8A5A1F;
+    --sale-soft: #F5EDE0;
+    --wa: #1FAD53;          /* WhatsApp green, reserved for the CTA only */
+    --wa-ink: #FFFFFF;
+    --photo-a: #DDE6DF;
+    --photo-b: #CBD8CF;
+    --shadow: 0 1px 3px rgba(31, 42, 36, .08), 0 8px 24px rgba(31, 42, 36, .06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ground: #141A17;
+      --card: #1C2420;
+      --ink: #E9EEEA;
+      --muted: #93A29A;
+      --line: #2B352F;
+      --accent: #86C9AC;
+      --accent-soft: #22312A;
+      --sale: #D9A85E;
+      --sale-soft: #33291B;
+      --wa: #25C05F;
+      --wa-ink: #0B140E;
+      --photo-a: #223029;
+      --photo-b: #1B2721;
+      --shadow: 0 1px 3px rgba(0, 0, 0, .35), 0 8px 24px rgba(0, 0, 0, .25);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #141A17;
+    --card: #1C2420;
+    --ink: #E9EEEA;
+    --muted: #93A29A;
+    --line: #2B352F;
+    --accent: #86C9AC;
+    --accent-soft: #22312A;
+    --sale: #D9A85E;
+    --sale-soft: #33291B;
+    --wa: #25C05F;
+    --wa-ink: #0B140E;
+    --photo-a: #223029;
+    --photo-b: #1B2721;
+    --shadow: 0 1px 3px rgba(0, 0, 0, .35), 0 8px 24px rgba(0, 0, 0, .25);
+  }
+  :root[data-theme="light"] {
+    --ground: #FAFAF7;
+    --card: #FFFFFF;
+    --ink: #1F2A24;
+    --muted: #66756C;
+    --line: #E3E8E2;
+    --accent: #1E5B4A;
+    --accent-soft: #EAF2EE;
+    --sale: #8A5A1F;
+    --sale-soft: #F5EDE0;
+    --wa: #1FAD53;
+    --wa-ink: #FFFFFF;
+    --photo-a: #DDE6DF;
+    --photo-b: #CBD8CF;
+    --shadow: 0 1px 3px rgba(31, 42, 36, .08), 0 8px 24px rgba(31, 42, 36, .06);
+  }
+
+  /* ---------- Base ---------- */
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+  body.has-stickybar { padding-bottom: 92px; }
+  .serif {
+    font-family: "Palatino Linotype", Palatino, "Book Antiqua", "Iowan Old Style", Georgia, serif;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 0 20px; }
+  a { color: var(--accent); }
+
+  .badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+    padding: 4px 11px;
+    border-radius: 999px;
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+  .badge.sale { background: var(--sale-soft); color: var(--sale); }
+
+  /* ---------- Site header ---------- */
+  header.site { padding: 40px 0 8px; }
+  header.site h1 {
+    font-size: clamp(28px, 5vw, 40px);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    margin: 0 0 4px;
+    text-wrap: balance;
+  }
+  header.site .tagline { color: var(--muted); margin: 0; }
+
+  /* ---------- Filter tabs ---------- */
+  .tabs {
+    display: flex;
+    gap: 8px;
+    margin: 22px 0 20px;
+    flex-wrap: wrap;
+  }
+  .tabs button {
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--muted);
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 7px 18px;
+    cursor: pointer;
+  }
+  .tabs button[aria-pressed="true"] {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--ground);
+  }
+  .tabs button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+  /* ---------- Listing cards ---------- */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 18px;
+    padding-bottom: 8px;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    color: inherit;
+    transition: transform .14s ease;
+  }
+  .card:hover { transform: translateY(-2px); }
+  .card:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .card .photo {
+    height: 190px;
+    background: radial-gradient(120% 90% at 20% 10%, var(--photo-a), var(--photo-b));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    font-size: 13px;
+    position: relative;
+  }
+  .card .photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .card .photo .badge { position: absolute; top: 12px; left: 12px; }
+  .card .body { padding: 16px 18px 18px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
+  .card h2 {
+    font-size: 19px;
+    font-weight: 600;
+    margin: 0;
+    line-height: 1.3;
+  }
+  .card .loc { color: var(--muted); font-size: 14px; margin: 0; }
+  .card .meta {
+    display: flex;
+    gap: 14px;
+    color: var(--muted);
+    font-size: 13.5px;
+    font-variant-numeric: tabular-nums;
+  }
+  .card .rowend {
+    margin-top: auto;
+    padding-top: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .card .price {
+    font-size: 19px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  .card .price small { font-size: 13px; font-weight: 400; color: var(--muted); }
+
+  .empty {
+    color: var(--muted);
+    text-align: center;
+    padding: 60px 0;
+  }
+
+  /* ---------- WhatsApp button ---------- */
+  .btn-wa {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    background: var(--wa);
+    color: var(--wa-ink);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 15px;
+    padding: 10px 18px;
+    border-radius: 999px;
+    white-space: nowrap;
+    transition: transform .12s ease, filter .12s ease;
+  }
+  .btn-wa.big { font-size: 17px; padding: 14px 26px; }
+  .btn-wa:hover { filter: brightness(1.06); }
+  .btn-wa:active { transform: scale(.98); }
+  .btn-wa:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+
+  /* ---------- Detail view ---------- */
+  .back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 26px 0 4px;
+    font-size: 14.5px;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  header.hero { padding: 14px 0 26px; }
+  .hero h1 {
+    font-size: clamp(28px, 5.5vw, 42px);
+    line-height: 1.12;
+    margin: 12px 0 6px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+  .hero .locality { color: var(--muted); font-size: 17px; margin: 0; }
+  .pricebar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 8px 18px;
+    margin-top: 18px;
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+  }
+  .pricebar .price {
+    font-size: clamp(24px, 4vw, 32px);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .pricebar .price small { font-size: 15px; font-weight: 400; color: var(--muted); }
+  .avail { color: var(--muted); font-size: 14px; }
+
+  .gallery {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-auto-rows: 130px;
+    gap: 10px;
+  }
+  .shot {
+    position: relative;
+    border-radius: 10px;
+    overflow: hidden;
+    background: radial-gradient(120% 90% at 20% 10%, var(--photo-a), var(--photo-b));
+    border: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+  }
+  .shot img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .shot.main { grid-column: span 2; grid-row: span 2; }
+  .shot .ph {
+    color: var(--muted);
+    font-size: 13px;
+    text-align: center;
+    padding: 10px;
+  }
+  @media (max-width: 640px) {
+    .gallery { grid-template-columns: repeat(2, 1fr); grid-auto-rows: 110px; }
+    .shot.main { grid-column: span 2; }
+  }
+
+  .facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 10px;
+    margin-top: 22px;
+  }
+  .fact {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .fact .k {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .fact .v { font-size: 18px; font-weight: 600; margin-top: 2px; font-variant-numeric: tabular-nums; }
+
+  section { margin-top: 42px; }
+  section > h2 { font-size: 24px; font-weight: 500; margin: 0 0 14px; }
+  .prose { max-width: 68ch; }
+  .prose p { margin: 0 0 14px; }
+
+  .amenities {
+    list-style: none;
+    margin: 0; padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 8px 24px;
+  }
+  .amenities li { display: flex; align-items: center; gap: 10px; padding: 6px 0; }
+  .amenities li::before {
+    content: "";
+    flex: none;
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  .mapcard {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--card);
+    padding: 18px 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .mapcard .addr { font-weight: 600; }
+  .mapcard .hint { color: var(--muted); font-size: 14px; }
+
+  .contact {
+    margin-top: 52px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    padding: 30px 28px;
+    text-align: center;
+  }
+  .contact h2 { font-size: 26px; font-weight: 500; margin: 0 0 6px; }
+  .contact p { color: var(--muted); margin: 0 auto 20px; max-width: 46ch; }
+  .contact .alt { margin-top: 14px; font-size: 14px; color: var(--muted); }
+
+  .stickybar {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    background: var(--card);
+    border-top: 1px solid var(--line);
+    padding: 12px 20px calc(12px + env(safe-area-inset-bottom));
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    z-index: 10;
+  }
+  .stickybar .p { font-weight: 600; font-size: 16px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .stickybar .p small { color: var(--muted); font-weight: 400; }
+
+  footer { margin: 56px 0 24px; color: var(--muted); font-size: 13px; text-align: center; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .card, .btn-wa { transition: none; }
+  }
+</style>
+
+<div id="app" class="wrap"></div>
+<div id="sticky"></div>
+
+<script>
+/* =============================================================================
+   YOUR SETTINGS — edit these
+   ========================================================================== */
+const CONFIG = {
+  siteName: "My Property Listings",          // shown as the page heading
+  tagline: "Listed directly by the owner — no agent fees",
+  whatsappNumber: "601128605160",            // country code + number, no + or spaces
+  phoneDisplay: "+60 11-2860 5160",          // how the number is shown on the page
+};
+
+/* =============================================================================
+   YOUR PROPERTIES — add, edit, or delete blocks freely.
+   Each property is one { ... } block. Copy a whole block to add a new one,
+   delete a block to remove it. Order here = order on the page.
+
+   photos: list of { caption, src }. Leave src: "" to show a labeled
+   placeholder until you have the photo. First photo is the big one.
+   ========================================================================== */
+const LISTINGS = [
+  {
+    id: "example-condo",              // short unique name, used in the link
+    status: "rent",                   // "rent" or "sale"
+    title: "Cozy 3-Bedroom Condo (EXAMPLE — replace me)",
+    location: "Mont Kiara, Kuala Lumpur",
+    priceDisplay: "RM 2,300",
+    priceSuffix: "/ month",           // leave "" for sale listings
+    availability: "Available from 1 August 2026 · Min 12-month lease",
+    beds: "3", baths: "2", size: "1,100 sq ft",
+    facts: {
+      "Bedrooms": "3",
+      "Bathrooms": "2",
+      "Floor area": "1,100 sq ft",
+      "Parking": "1 car",
+      "Furnishing": "Fully furnished",
+    },
+    description: [
+      "Well-maintained unit on a high floor with unblocked views. Bright living area, renovated kitchen, and a helpful management office. Walking distance to shops and eateries.",
+      "Water and internet included. Sorry, no smoking indoors.",
+    ],
+    amenities: [
+      "Air conditioning in all rooms",
+      "Washing machine & refrigerator",
+      "Swimming pool & gym",
+      "24-hour security with access card",
+      "Covered parking",
+      "5 min walk to shops",
+    ],
+    address: "Jalan Kiara, Mont Kiara, Kuala Lumpur",
+    mapsQuery: "Mont Kiara Kuala Lumpur",
+    photos: [
+      { caption: "Living room", src: "" },
+      { caption: "Kitchen", src: "" },
+      { caption: "Master bedroom", src: "" },
+      { caption: "Bathroom", src: "" },
+      { caption: "View from balcony", src: "" },
+    ],
+  },
+  {
+    id: "example-terrace",
+    status: "sale",
+    title: "Double-Storey Terrace House (EXAMPLE — replace me)",
+    location: "Puchong, Selangor",
+    priceDisplay: "RM 680,000",
+    priceSuffix: "",
+    availability: "Freehold · Vacant possession",
+    beds: "4", baths: "3", size: "1,650 sq ft",
+    facts: {
+      "Bedrooms": "4",
+      "Bathrooms": "3",
+      "Built-up": "1,650 sq ft",
+      "Land": "20 × 70 ft",
+      "Tenure": "Freehold",
+    },
+    description: [
+      "Well-kept family home in an established neighbourhood. Extended kitchen, renovated bathrooms, and a fenced car porch that fits two cars.",
+      "Near schools, banks, and the LDP highway. Serious buyers welcome to view anytime.",
+    ],
+    amenities: [
+      "Extended wet & dry kitchen",
+      "Renovated bathrooms (2024)",
+      "Car porch fits 2 cars",
+      "Guarded neighbourhood",
+      "5 min to LDP highway",
+      "Near primary & secondary schools",
+    ],
+    address: "Bandar Puchong Jaya, Puchong, Selangor",
+    mapsQuery: "Bandar Puchong Jaya Puchong",
+    photos: [
+      { caption: "Front of house", src: "" },
+      { caption: "Living room", src: "" },
+      { caption: "Kitchen", src: "" },
+      { caption: "Master bedroom", src: "" },
+      { caption: "Car porch", src: "" },
+    ],
+  },
+];
+
+/* =============================================================================
+   Everything below renders the page — no need to edit.
+   ========================================================================== */
+const esc = s => String(s).replace(/[&<>"']/g, c =>
+  ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+const WA_ICON = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.52.149-.174.198-.298.297-.497.1-.198.05-.371-.025-.52-.074-.149-.668-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.064 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>';
+
+const CAMERA_ICON = '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="opacity:.55;display:block;margin:0 auto 6px"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>';
+
+function waLink(listing) {
+  const msg = listing
+    ? `Hi, I'm interested in "${listing.title}" (${listing.location}). Is it still available?`
+    : "Hi, I saw your property listings and I'm interested.";
+  return `https://wa.me/${CONFIG.whatsappNumber}?text=${encodeURIComponent(msg)}`;
+}
+
+function waButton(listing, big, label) {
+  return `<a class="btn-wa${big ? " big" : ""}" target="_blank" rel="noopener"
+    href="${esc(waLink(listing))}">${WA_ICON} ${esc(label || "Chat on WhatsApp")}</a>`;
+}
+
+function badge(status) {
+  return status === "sale"
+    ? '<span class="badge sale">For Sale</span>'
+    : '<span class="badge">For Rent</span>';
+}
+
+function photoOrPlaceholder(photo, extraClass) {
+  const inner = photo && photo.src
+    ? `<img src="${esc(photo.src)}" alt="${esc(photo.caption || "")}">`
+    : `<div class="ph">${CAMERA_ICON}${esc(photo ? photo.caption : "Photo coming soon")}</div>`;
+  return `<figure class="shot${extraClass ? " " + extraClass : ""}">${inner}</figure>`;
+}
+
+let currentFilter = "all";
+
+function renderList() {
+  document.title = CONFIG.siteName;
+  const app = document.getElementById("app");
+  const items = LISTINGS.filter(l => currentFilter === "all" || l.status === currentFilter);
+
+  const cards = items.map(l => {
+    const cover = l.photos && l.photos[0] && l.photos[0].src
+      ? `<img src="${esc(l.photos[0].src)}" alt="${esc(l.photos[0].caption || l.title)}">`
+      : `<div>${CAMERA_ICON}Photo coming soon</div>`;
+    return `
+    <a class="card" href="#${esc(l.id)}">
+      <div class="photo">${cover}${badge(l.status)}</div>
+      <div class="body">
+        <h2>${esc(l.title)}</h2>
+        <p class="loc">${esc(l.location)}</p>
+        <div class="meta">
+          <span>${esc(l.beds)} bed</span><span>${esc(l.baths)} bath</span><span>${esc(l.size)}</span>
+        </div>
+        <div class="rowend">
+          <div class="price">${esc(l.priceDisplay)}${l.priceSuffix ? ` <small>${esc(l.priceSuffix)}</small>` : ""}</div>
+          <span class="btn-wa" role="presentation">${WA_ICON} WhatsApp</span>
+        </div>
+      </div>
+    </a>`;
+  }).join("");
+
+  const tab = (key, label) =>
+    `<button aria-pressed="${currentFilter === key}" data-filter="${key}">${label}</button>`;
+
+  app.innerHTML = `
+    <header class="site">
+      <h1 class="serif">${esc(CONFIG.siteName)}</h1>
+      <p class="tagline">${esc(CONFIG.tagline)}</p>
+    </header>
+    <nav class="tabs" aria-label="Filter listings">
+      ${tab("all", "All")} ${tab("rent", "For Rent")} ${tab("sale", "For Sale")}
+    </nav>
+    <div class="grid">${cards}</div>
+    ${items.length === 0 ? '<p class="empty">No listings in this category right now — check back soon.</p>' : ""}
+    <section class="contact">
+      <h2 class="serif">Questions about any property?</h2>
+      <p>Message me on WhatsApp and I'll get back to you the same day.</p>
+      ${waButton(null, true)}
+      <p class="alt">Prefer to call? <a href="tel:+${esc(CONFIG.whatsappNumber)}">${esc(CONFIG.phoneDisplay)}</a></p>
+    </section>
+    <footer>${esc(CONFIG.tagline)}</footer>`;
+
+  app.querySelectorAll(".tabs button").forEach(b =>
+    b.addEventListener("click", () => { currentFilter = b.dataset.filter; renderList(); }));
+
+  document.getElementById("sticky").innerHTML = "";
+  document.body.classList.remove("has-stickybar");
+  window.scrollTo(0, 0);
+}
+
+function renderDetail(l) {
+  document.title = `${l.title} — ${CONFIG.siteName}`;
+  const app = document.getElementById("app");
+
+  const photos = (l.photos && l.photos.length ? l.photos : [{ caption: "Photo coming soon", src: "" }])
+    .slice(0, 5)
+    .map((p, i) => photoOrPlaceholder(p, i === 0 ? "main" : ""))
+    .join("");
+
+  const facts = Object.entries(l.facts || {}).map(([k, v]) =>
+    `<div class="fact"><div class="k">${esc(k)}</div><div class="v">${esc(v)}</div></div>`).join("");
+
+  const paras = (l.description || []).map(p => `<p>${esc(p)}</p>`).join("");
+  const amens = (l.amenities || []).map(a => `<li>${esc(a)}</li>`).join("");
+
+  app.innerHTML = `
+    <a class="back" href="#">← All listings</a>
+    <header class="hero">
+      ${badge(l.status)}
+      <h1 class="serif">${esc(l.title)}</h1>
+      <p class="locality">${esc(l.location)}</p>
+      <div class="pricebar">
+        <div class="price">${esc(l.priceDisplay)}${l.priceSuffix ? ` <small>${esc(l.priceSuffix)}</small>` : ""}</div>
+        <div class="avail">${esc(l.availability || "")}</div>
+      </div>
+    </header>
+    <div class="gallery">${photos}</div>
+    <div class="facts">${facts}</div>
+    ${paras ? `<section><h2 class="serif">About this property</h2><div class="prose">${paras}</div></section>` : ""}
+    ${amens ? `<section><h2 class="serif">What's included</h2><ul class="amenities">${amens}</ul></section>` : ""}
+    ${l.address ? `
+    <section>
+      <h2 class="serif">Location</h2>
+      <div class="mapcard">
+        <div><div class="addr">${esc(l.address)}</div></div>
+        <a href="https://maps.google.com/?q=${encodeURIComponent(l.mapsQuery || l.address)}" target="_blank" rel="noopener">Open in Google Maps →</a>
+      </div>
+    </section>` : ""}
+    <section class="contact">
+      <h2 class="serif">Come see it in person</h2>
+      <p>Viewings are easy to arrange — message me on WhatsApp and I'll get back to you the same day.</p>
+      ${waButton(l, true)}
+      <p class="alt">Prefer to call? <a href="tel:+${esc(CONFIG.whatsappNumber)}">${esc(CONFIG.phoneDisplay)}</a></p>
+    </section>
+    <footer>${esc(CONFIG.tagline)}</footer>`;
+
+  document.getElementById("sticky").innerHTML = `
+    <div class="stickybar">
+      <div class="p">${esc(l.priceDisplay)}${l.priceSuffix ? ` <small>${esc(l.priceSuffix)}</small>` : ""}</div>
+      ${waButton(l, false, "WhatsApp")}
+    </div>`;
+  document.body.classList.add("has-stickybar");
+  window.scrollTo(0, 0);
+}
+
+function route() {
+  const id = decodeURIComponent(location.hash.replace(/^#/, ""));
+  const listing = LISTINGS.find(l => l.id === id);
+  if (listing) renderDetail(listing); else renderList();
+}
+
+window.addEventListener("hashchange", route);
+route();
+</script>
