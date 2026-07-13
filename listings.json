@@ -34,11 +34,30 @@
       ],
       "address": "Jalan Kiara, Mont Kiara, Kuala Lumpur",
       "photos": [
-        { "caption": "Living room", "src": "" },
-        { "caption": "Kitchen", "src": "" },
-        { "caption": "Master bedroom", "src": "" },
-        { "caption": "Bathroom", "src": "" },
-        { "caption": "View from balcony", "src": "" }
+        {
+          "caption": "Living room",
+          "src": ""
+        },
+        {
+          "caption": "Kitchen",
+          "src": ""
+        },
+        {
+          "caption": "Master bedroom",
+          "src": ""
+        },
+        {
+          "caption": "Bathroom",
+          "src": ""
+        },
+        {
+          "caption": "View from balcony",
+          "src": ""
+        },
+        {
+          "caption": "",
+          "src": "photos/1783915431733-k85h.jpg"
+        }
       ]
     },
     {
@@ -69,11 +88,26 @@
       ],
       "address": "Bandar Puchong Jaya, Puchong, Selangor",
       "photos": [
-        { "caption": "Front of house", "src": "" },
-        { "caption": "Living room", "src": "" },
-        { "caption": "Kitchen", "src": "" },
-        { "caption": "Master bedroom", "src": "" },
-        { "caption": "Car porch", "src": "" }
+        {
+          "caption": "Front of house",
+          "src": ""
+        },
+        {
+          "caption": "Living room",
+          "src": ""
+        },
+        {
+          "caption": "Kitchen",
+          "src": ""
+        },
+        {
+          "caption": "Master bedroom",
+          "src": ""
+        },
+        {
+          "caption": "Car porch",
+          "src": ""
+        }
       ]
     }
   ]
