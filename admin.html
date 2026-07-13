@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Listing Manager</title>
+<style>
+  :root {
+    --ground: #FAFAF7; --card: #FFFFFF; --ink: #1F2A24; --muted: #66756C;
+    --line: #E3E8E2; --accent: #1E5B4A; --accent-soft: #EAF2EE;
+    --danger: #A33B2E; --danger-soft: #F7E9E6;
+    --ok: #1FAD53;
+    --shadow: 0 1px 3px rgba(31,42,36,.08), 0 8px 24px rgba(31,42,36,.06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ground: #141A17; --card: #1C2420; --ink: #E9EEEA; --muted: #93A29A;
+      --line: #2B352F; --accent: #86C9AC; --accent-soft: #22312A;
+      --danger: #E08373; --danger-soft: #35211D;
+      --ok: #25C05F;
+      --shadow: 0 1px 3px rgba(0,0,0,.35), 0 8px 24px rgba(0,0,0,.25);
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--ground); color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    font-size: 16px; line-height: 1.5;
+    padding-bottom: 96px;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 0 16px; }
+  h1 { font-size: 24px; font-weight: 600; margin: 26px 0 2px; }
+  .sub { color: var(--muted); font-size: 14px; margin: 0 0 20px; }
+  .sub a { color: var(--accent); }
+  a { color: var(--accent); }
+
+  .cardbox {
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+    box-shadow: var(--shadow); padding: 18px; margin-bottom: 14px;
+  }
+  label { display: block; font-size: 12px; font-weight: 600; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--muted); margin: 12px 0 4px; }
+  input[type=text], textarea, select {
+    width: 100%; font: inherit; color: var(--ink);
+    background: var(--ground); border: 1px solid var(--line);
+    border-radius: 8px; padding: 9px 12px;
+  }
+  input:focus, textarea:focus, select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  textarea { min-height: 90px; resize: vertical; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
+  .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0 12px; }
+  @media (max-width: 520px) { .row3 { grid-template-columns: 1fr 1fr; } }
+  .hint { font-size: 12.5px; color: var(--muted); margin-top: 3px; }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px; font: inherit;
+    font-size: 15px; font-weight: 600; cursor: pointer; border-radius: 999px;
+    padding: 10px 20px; border: 1px solid var(--accent);
+    background: var(--accent); color: var(--ground);
+  }
+  .btn.ghost { background: transparent; color: var(--accent); }
+  .btn.danger { background: transparent; color: var(--danger); border-color: var(--danger); }
+  .btn.small { font-size: 13px; padding: 6px 14px; }
+  .btn:disabled { opacity: .5; cursor: default; }
+  .btn:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+  details.listing {
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+    box-shadow: var(--shadow); margin-bottom: 12px;
+  }
+  details.listing > summary {
+    list-style: none; cursor: pointer; padding: 15px 18px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  details.listing > summary::-webkit-details-marker { display: none; }
+  details.listing > summary::after {
+    content: "▾"; margin-left: auto; color: var(--muted);
+    transition: transform .15s ease;
+  }
+  details.listing[open] > summary::after { transform: rotate(180deg); }
+  .sum-title { font-weight: 600; }
+  .sum-sub { font-size: 13px; color: var(--muted); }
+  .tag {
+    font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+    padding: 3px 10px; border-radius: 999px; background: var(--accent-soft); color: var(--accent);
+    flex: none;
+  }
+  .listing-body { padding: 0 18px 18px; border-top: 1px solid var(--line); }
+
+  .photogrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; margin-top: 8px; }
+  .thumb { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--ground); }
+  .thumb img { width: 100%; height: 84px; object-fit: cover; display: block; }
+  .thumb .noimg { height: 84px; display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 12px; }
+  .thumb input { border: 0; border-top: 1px solid var(--line); border-radius: 0; font-size: 12.5px; padding: 6px 8px; background: var(--card); width: 100%; }
+  .thumb .tools { display: flex; }
+  .thumb .tools button {
+    flex: 1; font: inherit; font-size: 11.5px; padding: 5px 0; cursor: pointer;
+    background: var(--card); color: var(--muted); border: 0; border-top: 1px solid var(--line);
+  }
+  .thumb .tools button + button { border-left: 1px solid var(--line); }
+  .thumb .tools button.del { color: var(--danger); }
+
+  .toolbar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin: 4px 0 18px; }
+
+  .savebar {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
+    background: var(--card); border-top: 1px solid var(--line);
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  }
+  .savebar .status { font-size: 14px; color: var(--muted); }
+  .savebar .status.ok { color: var(--ok); font-weight: 600; }
+  .savebar .status.err { color: var(--danger); font-weight: 600; }
+
+  .gate { max-width: 480px; margin: 60px auto; }
+  .gate h1 { margin-top: 0; }
+  .steps { font-size: 14.5px; padding-left: 20px; }
+  .steps li { margin-bottom: 8px; }
+  details.help { margin: 14px 0; }
+  details.help summary { cursor: pointer; font-weight: 600; color: var(--accent); }
+</style>
+</head>
+<body>
+
+<div class="wrap" id="app"><p style="color:var(--muted)">Loading…</p></div>
+<div id="savebar"></div>
+
+<script>
+const OWNER = "lokeyp23", REPO = "property-site", FILE = "listings.json", BRANCH = "main";
+const SITE_URL = "https://" + OWNER + ".github.io/" + REPO + "/";
+
+let token = localStorage.getItem("gh_token") || "";
+let data = null, sha = null, pending = {}, dirty = false, saving = false;
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c =>
+  ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+const b64enc = s => btoa(unescape(encodeURIComponent(s)));
+const b64dec = s => decodeURIComponent(escape(atob(s.replace(/\s/g, ""))));
+
+function api(path, opts = {}) {
+  return fetch(`https://api.github.com/repos/${OWNER}/${REPO}/${path}`, {
+    ...opts,
+    headers: {
+      "Authorization": "Bearer " + token,
+      "Accept": "application/vnd.github+json",
+      ...(opts.headers || {}),
+    },
+  });
+}
+
+/* ---------- token gate ---------- */
+function renderGate(msg) {
+  $("savebar").innerHTML = "";
+  $("app").innerHTML = `
+    <div class="gate">
+      <h1>Listing Manager</h1>
+      <p class="sub">This page updates <a href="${SITE_URL}" target="_blank" rel="noopener">${SITE_URL.replace("https://","")}</a></p>
+      <div class="cardbox">
+        ${msg ? `<p style="color:var(--danger);margin-top:0"><strong>${esc(msg)}</strong></p>` : ""}
+        <label for="tok">Your access key</label>
+        <input type="text" id="tok" placeholder="github_pat_…" autocomplete="off">
+        <p class="hint">Stored only in this browser, on this device. You'll need to paste it once per device.</p>
+        <p style="margin-bottom:0"><button class="btn" onclick="saveToken()">Unlock</button></p>
+        <details class="help">
+          <summary>How do I get my access key?</summary>
+          <ol class="steps">
+            <li>Sign in at <strong>github.com</strong> (account: ${OWNER})</li>
+            <li>Open <strong>github.com/settings/personal-access-tokens/new</strong></li>
+            <li>Token name: <strong>property admin</strong> · Expiration: <strong>1 year</strong> (custom)</li>
+            <li>Repository access: <strong>Only select repositories</strong> → choose <strong>${REPO}</strong></li>
+            <li>Permissions → Repository permissions → <strong>Contents</strong> → <strong>Read and write</strong></li>
+            <li>Click <strong>Generate token</strong>, copy the key that starts with <code>github_pat_</code>, and paste it above</li>
+          </ol>
+        </details>
+      </div>
+    </div>`;
+}
+function saveToken() {
+  const v = $("tok").value.trim();
+  if (!v) return;
+  token = v;
+  localStorage.setItem("gh_token", v);
+  boot();
+}
+function logout() {
+  if (dirty && !confirm("You have unsaved changes. Sign out anyway?")) return;
+  localStorage.removeItem("gh_token");
+  token = ""; data = null;
+  renderGate();
+}
+
+/* ---------- load ---------- */
+async function boot() {
+  $("app").innerHTML = '<p style="color:var(--muted)">Loading your listings…</p>';
+  try {
+    const r = await api(`contents/${FILE}?ref=${BRANCH}`);
+    if (r.status === 401) return renderGate("That key was not accepted — check it and try again.");
+    if (r.status === 403 || r.status === 404) return renderGate("This key can't reach the site files. Make sure it has Contents read & write access to " + REPO + ".");
+    const j = await r.json();
+    sha = j.sha;
+    data = JSON.parse(b64dec(j.content));
+    dirty = false; pending = {};
+    normalizeLoaded();
+    render();
+  } catch (e) {
+    renderGate("Could not connect — check your internet and try again.");
+  }
+}
+
+/* ---------- render ---------- */
+function field(i, key, label, placeholder, hint) {
+  const l = data.listings[i];
+  return `<label>${label}</label>
+    <input type="text" value="${esc(l[key])}" placeholder="${esc(placeholder || "")}"
+      oninput="upd(${i},'${key}',this.value)">
+    ${hint ? `<p class="hint">${hint}</p>` : ""}`;
+}
+
+function render() {
+  const cards = data.listings.map((l, i) => `
+  <details class="listing" ${l._open ? "open" : ""} ontoggle="data.listings[${i}]._open=this.open">
+    <summary>
+      <span class="tag">${l.status === "sale" ? "Sale" : "Rent"}</span>
+      <span>
+        <div class="sum-title">${esc(l.title) || "<em>Untitled property</em>"}</div>
+        <div class="sum-sub">${esc(l.location)} · ${esc(l.priceDisplay)}${esc(l.priceSuffix ? " " + l.priceSuffix : "")}</div>
+      </span>
+    </summary>
+    <div class="listing-body">
+      <label>Listing type</label>
+      <select onchange="upd(${i},'status',this.value)">
+        <option value="rent" ${l.status !== "sale" ? "selected" : ""}>For Rent</option>
+        <option value="sale" ${l.status === "sale" ? "selected" : ""}>For Sale</option>
+      </select>
+      ${field(i, "title", "Title", "e.g. Cozy 3-Bedroom Condo")}
+      ${field(i, "location", "Area", "e.g. Mont Kiara, Kuala Lumpur")}
+      <div class="row">
+        <span>${field(i, "priceDisplay", "Price", "e.g. RM 2,300")}</span>
+        <span>${field(i, "priceSuffix", "Price suffix", "/ month — leave empty for sale")}</span>
+      </div>
+      ${field(i, "availability", "Availability line", "e.g. Available now · Min 12-month lease")}
+      <div class="row3">
+        <span>${field(i, "beds", "Bedrooms", "3")}</span>
+        <span>${field(i, "baths", "Bathrooms", "2")}</span>
+        <span>${field(i, "size", "Size", "1,100 sq ft")}</span>
+      </div>
+      <div class="row3">
+        <span>${field(i, "parking", "Parking", "1 car")}</span>
+        <span>${field(i, "furnishing", "Furnishing", "Fully furnished")}</span>
+        <span>${field(i, "tenure", "Tenure", "Freehold — optional")}</span>
+      </div>
+      <label>Description</label>
+      <textarea oninput="upd(${i},'_desc',this.value)"
+        placeholder="Describe the property. Leave an empty line between paragraphs.">${esc(l._desc)}</textarea>
+      <label>What's included (one per line)</label>
+      <textarea oninput="upd(${i},'_amen',this.value)"
+        placeholder="Air conditioning in all rooms&#10;Covered parking">${esc(l._amen)}</textarea>
+      ${field(i, "address", "Address (shown with a Google Maps link)", "e.g. Jalan Kiara, Mont Kiara, KL")}
+      <label>Photos — first photo is the cover</label>
+      <div class="photogrid">
+        ${l.photos.map((p, j) => `
+        <div class="thumb">
+          ${p._preview || p.src
+            ? `<img src="${esc(p._preview || p.src)}" alt="">`
+            : `<div class="noimg">no photo yet</div>`}
+          <input type="text" value="${esc(p.caption)}" placeholder="Caption"
+            oninput="data.listings[${i}].photos[${j}].caption=this.value;markDirty()">
+          <div class="tools">
+            ${j > 0 ? `<button onclick="makeCover(${i},${j})">☝ cover</button>` : ""}
+            <button class="del" onclick="delPhoto(${i},${j})">remove</button>
+          </div>
+        </div>`).join("")}
+      </div>
+      <p><input type="file" accept="image/*" multiple onchange="addPhotos(${i}, this)"></p>
+      <p style="margin-bottom:0"><button class="btn danger small" onclick="delListing(${i})">Delete this listing</button></p>
+    </div>
+  </details>`).join("");
+
+  $("app").innerHTML = `
+    <h1>Listing Manager</h1>
+    <p class="sub">Changes go live at <a href="${SITE_URL}" target="_blank" rel="noopener">${SITE_URL.replace("https://","")}</a>
+      about a minute after you save · <a href="javascript:logout()">sign out</a></p>
+
+    <div class="toolbar">
+      <button class="btn" onclick="addListing()">＋ Add property</button>
+    </div>
+
+    ${cards || '<p style="color:var(--muted)">No listings yet — add your first property.</p>'}
+
+    <details class="listing">
+      <summary><span class="tag">Site</span><span><div class="sum-title">Site settings</div>
+        <div class="sum-sub">Name, tagline, WhatsApp number</div></span></summary>
+      <div class="listing-body">
+        <label>Site name</label>
+        <input type="text" value="${esc(data.config.siteName)}" oninput="updCfg('siteName',this.value)">
+        <label>Tagline</label>
+        <input type="text" value="${esc(data.config.tagline)}" oninput="updCfg('tagline',this.value)">
+        <div class="row">
+          <span><label>WhatsApp number (digits only)</label>
+          <input type="text" value="${esc(data.config.whatsappNumber)}" oninput="updCfg('whatsappNumber',this.value)">
+          <p class="hint">Country code + number, no + or spaces, e.g. 601128605160</p></span>
+          <span><label>Number as shown on page</label>
+          <input type="text" value="${esc(data.config.phoneDisplay)}" oninput="updCfg('phoneDisplay',this.value)"></span>
+        </div>
+      </div>
+    </details>`;
+  renderSavebar();
+}
+
+function renderSavebar(status, cls) {
+  $("savebar").innerHTML = `
+    <div class="savebar">
+      <span class="status ${cls || ""}">${status || (dirty ? "Unsaved changes" : "All changes saved")}</span>
+      <button class="btn" onclick="saveAll()" ${dirty && !saving ? "" : "disabled"}>Save &amp; publish</button>
+    </div>`;
+}
+
+/* ---------- edits ---------- */
+function markDirty() { if (!dirty) { dirty = true; renderSavebar(); } }
+function upd(i, key, val) { data.listings[i][key] = val; markDirty(); }
+function updCfg(key, val) { data.config[key] = val; markDirty(); }
+
+function addListing() {
+  data.listings.forEach(l => l._open = false);
+  data.listings.unshift({
+    id: "", status: "rent", title: "", location: "",
+    priceDisplay: "", priceSuffix: "/ month", availability: "",
+    beds: "", baths: "", size: "", parking: "", furnishing: "", tenure: "",
+    _desc: "", _amen: "", address: "", photos: [], _open: true,
+  });
+  markDirty(); render();
+  window.scrollTo(0, 0);
+}
+
+function delListing(i) {
+  const name = data.listings[i].title || "this listing";
+  if (!confirm(`Delete "${name}" from the site?`)) return;
+  data.listings.splice(i, 1);
+  markDirty(); render();
+}
+
+function delPhoto(i, j) {
+  const p = data.listings[i].photos[j];
+  if (p.src && pending[p.src]) delete pending[p.src];
+  data.listings[i].photos.splice(j, 1);
+  markDirty(); render();
+}
+
+function makeCover(i, j) {
+  const ph = data.listings[i].photos.splice(j, 1)[0];
+  data.listings[i].photos.unshift(ph);
+  markDirty(); render();
+}
+
+function addPhotos(i, input) {
+  [...input.files].forEach(file => {
+    const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(img.src);
+      const max = 1600, s = Math.min(1, max / Math.max(img.width, img.height));
+      const c = document.createElement("canvas");
+      c.width = Math.round(img.width * s);
+      c.height = Math.round(img.height * s);
+      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+      const dataUrl = c.toDataURL("image/jpeg", 0.82);
+      const path = `photos/${Date.now()}-${Math.random().toString(36).slice(2, 6)}.jpg`;
+      pending[path] = dataUrl.split(",")[1];
+      data.listings[i].photos.push({ caption: "", src: path, _preview: dataUrl });
+      markDirty(); render();
+    };
+    img.src = URL.createObjectURL(file);
+  });
+  input.value = "";
+}
+
+/* ---------- save ---------- */
+const slug = s => (s || "property").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 40) || "property";
+
+async function saveAll() {
+  if (saving || !dirty) return;
+  saving = true;
+
+  // finalize helper fields into real data
+  const used = new Set();
+  data.listings.forEach(l => {
+    l.description = (l._desc || "").split(/\n\s*\n/).map(s => s.trim()).filter(Boolean);
+    l.amenities = (l._amen || "").split("\n").map(s => s.trim()).filter(Boolean);
+    if (!l.id) l.id = slug(l.title);
+    while (used.has(l.id)) l.id += "-2";
+    used.add(l.id);
+  });
+
+  const clean = JSON.parse(JSON.stringify(data, (k, v) =>
+    (typeof k === "string" && k.startsWith("_")) ? undefined : v));
+
+  try {
+    const photoPaths = Object.keys(pending);
+    for (let n = 0; n < photoPaths.length; n++) {
+      renderSavebar(`Uploading photo ${n + 1} of ${photoPaths.length}…`);
+      const p = photoPaths[n];
+      const r = await api(`contents/${encodeURIComponent(p).replace(/%2F/g, "/")}`, {
+        method: "PUT",
+        body: JSON.stringify({ message: "Add photo", content: pending[p], branch: BRANCH }),
+      });
+      if (!r.ok && r.status !== 422) throw new Error("photo upload failed (" + r.status + ")");
+    }
+
+    renderSavebar("Publishing changes…");
+    const r = await api(`contents/${FILE}`, {
+      method: "PUT",
+      body: JSON.stringify({
+        message: "Update listings",
+        content: b64enc(JSON.stringify(clean, null, 2)),
+        sha, branch: BRANCH,
+      }),
+    });
+    if (!r.ok) throw new Error("publish failed (" + r.status + ")");
+    const j = await r.json();
+    sha = j.content.sha;
+    pending = {};
+    dirty = false; saving = false;
+    renderSavebar("Published! Live on the site in about a minute.", "ok");
+  } catch (e) {
+    saving = false;
+    renderSavebar("Something went wrong — your edits are still here. Check your internet and press Save again.", "err");
+  }
+}
+
+/* ---------- normalize loaded data ---------- */
+function normalizeLoaded() {
+  data.listings.forEach(l => {
+    l._desc = (l.description || []).join("\n\n");
+    l._amen = (l.amenities || []).join("\n");
+    l.photos = l.photos || [];
+  });
+}
+
+/* ---------- start ---------- */
+if (!token) renderGate();
+else boot();
+</script>
+</body>
+</html>

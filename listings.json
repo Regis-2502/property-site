@@ -1,0 +1,80 @@
+{
+  "config": {
+    "siteName": "My Property Listings",
+    "tagline": "Listed directly by the owner — no agent fees",
+    "whatsappNumber": "601128605160",
+    "phoneDisplay": "+60 11-2860 5160"
+  },
+  "listings": [
+    {
+      "id": "example-condo",
+      "status": "rent",
+      "title": "Cozy 3-Bedroom Condo (EXAMPLE — replace me)",
+      "location": "Mont Kiara, Kuala Lumpur",
+      "priceDisplay": "RM 2,300",
+      "priceSuffix": "/ month",
+      "availability": "Available from 1 August 2026 · Min 12-month lease",
+      "beds": "3",
+      "baths": "2",
+      "size": "1,100 sq ft",
+      "parking": "1 car",
+      "furnishing": "Fully furnished",
+      "tenure": "",
+      "description": [
+        "Well-maintained unit on a high floor with unblocked views. Bright living area, renovated kitchen, and a helpful management office. Walking distance to shops and eateries.",
+        "Water and internet included. Sorry, no smoking indoors."
+      ],
+      "amenities": [
+        "Air conditioning in all rooms",
+        "Washing machine & refrigerator",
+        "Swimming pool & gym",
+        "24-hour security with access card",
+        "Covered parking",
+        "5 min walk to shops"
+      ],
+      "address": "Jalan Kiara, Mont Kiara, Kuala Lumpur",
+      "photos": [
+        { "caption": "Living room", "src": "" },
+        { "caption": "Kitchen", "src": "" },
+        { "caption": "Master bedroom", "src": "" },
+        { "caption": "Bathroom", "src": "" },
+        { "caption": "View from balcony", "src": "" }
+      ]
+    },
+    {
+      "id": "example-terrace",
+      "status": "sale",
+      "title": "Double-Storey Terrace House (EXAMPLE — replace me)",
+      "location": "Puchong, Selangor",
+      "priceDisplay": "RM 680,000",
+      "priceSuffix": "",
+      "availability": "Freehold · Vacant possession",
+      "beds": "4",
+      "baths": "3",
+      "size": "1,650 sq ft",
+      "parking": "2 cars",
+      "furnishing": "Partly furnished",
+      "tenure": "Freehold",
+      "description": [
+        "Well-kept family home in an established neighbourhood. Extended kitchen, renovated bathrooms, and a fenced car porch that fits two cars.",
+        "Near schools, banks, and the LDP highway. Serious buyers welcome to view anytime."
+      ],
+      "amenities": [
+        "Extended wet & dry kitchen",
+        "Renovated bathrooms (2024)",
+        "Car porch fits 2 cars",
+        "Guarded neighbourhood",
+        "5 min to LDP highway",
+        "Near primary & secondary schools"
+      ],
+      "address": "Bandar Puchong Jaya, Puchong, Selangor",
+      "photos": [
+        { "caption": "Front of house", "src": "" },
+        { "caption": "Living room", "src": "" },
+        { "caption": "Kitchen", "src": "" },
+        { "caption": "Master bedroom", "src": "" },
+        { "caption": "Car porch", "src": "" }
+      ]
+    }
+  ]
+}
